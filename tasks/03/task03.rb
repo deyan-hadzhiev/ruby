@@ -33,7 +33,7 @@ module Graphics
   end
 
   class Line
-    attr_reader :from, :to
+    attr_reader :from, :to, :points
 
     def initialize(first, second)
       if first.x < second.x or (first.x == second.x and first.y < second.y)
@@ -41,6 +41,7 @@ module Graphics
       else
         @from, @to = second, first
       end
+      @points = []
     end
 
     def eql?(other_line)
@@ -60,13 +61,30 @@ module Graphics
     end
 
     def get_points
+      bresenham(@from, @to)
       @points
     end
 
-    def bresenham(upper_left, lower_right)
-      
+    def bresenham(from, to)
+      steep = (to.y - from.y).abs > (to.x - from.x).abs
+      if steep then from, to = Point.new(from.y, from.x), Point.new(to.y, to.x) end
+      if from.x > to.x then from, to = to, from end
+      delta_x, step_y = to.x - from.x, from.y < to.y ? 1 : -1
+      delta_y = (to.y - from.y).abs
+      bresenham_loop from.x, to.x, from.y, delta_x / 2, delta_x, delta_y, step_y, steep
     end
-    
+
+    def bresenham_loop(start_x, end_x, y, error, delta_x, delta_y, step_y, steep)
+      start_x.upto(end_x).each do |x|
+        steep ? plot(Point.new y, x) : plot(Point.new x, y)
+        error -= delta_y
+        if error < 0
+          y += step_y
+          error += delta_x
+        end
+      end
+    end
+
     def plot(point)
       @points << point
     end
