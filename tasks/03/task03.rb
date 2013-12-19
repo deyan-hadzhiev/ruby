@@ -1,5 +1,3 @@
-# task 03 - renderer
-
 module Graphics
   #Figures
   class Point
@@ -76,7 +74,7 @@ module Graphics
       start_x.upto(end_x).to_a.map do |x|
         point = steep ? Point.new(y, x) : Point.new(x, y)
         error -= delta_y
-        if error < 0
+        if error <= 0
           y, error = y + step_y, error + delta_x
         end
         point
@@ -87,7 +85,74 @@ module Graphics
   end
 
   class Rectangle
-    
+    attr_reader :left, :right
+
+    def initialize(first, second)
+      if first.x < second.x or (first.x == second.x and first.y < second.y)
+        @left, @right = first, second
+      else
+        @left, @right = second, first
+      end
+    end
+
+    def top_left
+      Point.new left.x, [left.y, right.y].min
+    end
+
+    def top_right
+      Point.new right.x, [left.y, right.y].min
+    end
+
+    def bottom_left
+      Point.new left.x, [left.y, right.y].max
+    end
+
+    def bottom_right
+      Point.new right.x, [left.y, right.y].max
+    end
+
+    def eql?(other)
+      top_left.eql? other.top_left and bottom_right.eql? other.bottom_right
+    end
+
+    def ==(other)
+      eql? other
+    end
+
+    def hash
+      "(#{top_left.x},#{top_left.y}):(#{bottom_right.x},#{bottom_right.y})".hash
+    end
+
+    def in_bounds?(width, height)
+      top_left.in_bounds?(width, height) and bottom_right.in_bounds?(width, height)
+    end
+
+    def get_points
+      points = []
+      points.concat get_horizontal_points(top_left, top_right)
+      points.concat get_vertical_points(top_right, bottom_right)
+      points.concat get_horizontal_points(bottom_left, bottom_right)
+      points.concat get_vertical_points(top_left, bottom_left)
+      points
+    end
+
+    def get_horizontal_points(left, right)
+      if left.y != right.y
+        []
+      else
+        left.x.upto(right.x).to_a.map { |x| Point.new x, left.y }
+      end
+    end
+
+    def get_vertical_points(top, bottom)
+      if top.x != bottom.x
+        []
+      else
+        top.y.upto(bottom.y).to_a.map { |y| Point.new top.x, y }
+      end
+    end
+
+    private :get_horizontal_points, :get_vertical_points
   end
 end
 
@@ -170,8 +235,6 @@ module Graphics
         </body>
         </html>'
 
-      private_constant :HTML_FOOTER, :HTML_HEADER
-
       def header
         HTML_HEADER
       end
@@ -197,16 +260,16 @@ module Graphics
     class OutOfBounds < StandardError
     end
 
-    attr_reader :width, :height, :canvas
+    attr_reader :width, :height
 
     def initialize( width, height)
       @width = width
       @height = height
-      @canvas = Array.new(height){ Array.new(width) { false } }
+      @canvas = Array.new(height) { Array.new(width) { false } }
     end
 
     def set_pixel(x, y)
-      if x >= @width or y >= @height
+      if x < 0 or x >= @width or y < 0 or y >= @height
         raise OutOfBounds, "Setting a pixel out of canvas' bounds."
       else
         @canvas[y][x] = true
@@ -214,7 +277,7 @@ module Graphics
     end
 
     def pixel_at?(x, y)
-      if x >= @width or y >= @height
+      if x < 0 or x >= @width or y < 0 or y >= @height
         raise OutOfBounds, "Reaching a pixel out of canvas' bounds"
       else
         @canvas[y][x]
@@ -233,13 +296,5 @@ module Graphics
     def render_as(renderer)
       renderer.render(@canvas)
     end
-  end
-end
-
-class FileOutput
-  def self.out(file, output_string)
-    output = File.open file, "w"
-    output << output_string
-    output.close
   end
 end
