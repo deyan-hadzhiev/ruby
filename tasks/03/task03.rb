@@ -33,7 +33,7 @@ module Graphics
   end
 
   class Line
-    attr_reader :from, :to, :points
+    attr_reader :from, :to
 
     def initialize(first, second)
       if first.x < second.x or (first.x == second.x and first.y < second.y)
@@ -41,7 +41,6 @@ module Graphics
       else
         @from, @to = second, first
       end
-      @points = []
     end
 
     def eql?(other_line)
@@ -62,7 +61,6 @@ module Graphics
 
     def get_points
       bresenham(@from, @to)
-      @points
     end
 
     def bresenham(from, to)
@@ -75,21 +73,21 @@ module Graphics
     end
 
     def bresenham_loop(start_x, end_x, y, error, delta_x, delta_y, step_y, steep)
-      start_x.upto(end_x).each do |x|
-        steep ? plot(Point.new y, x) : plot(Point.new x, y)
+      start_x.upto(end_x).to_a.map do |x|
+        point = steep ? Point.new(y, x) : Point.new(x, y)
         error -= delta_y
         if error < 0
-          y += step_y
-          error += delta_x
+          y, error = y + step_y, error + delta_x
         end
+        point
       end
     end
 
-    def plot(point)
-      @points << point
-    end
+    private :bresenham, :bresenham_loop
+  end
+
+  class Rectangle
     
-    private :bresenham, :plot
   end
 end
 
@@ -163,10 +161,12 @@ module Graphics
             </style>
           </head>
           <body>
-            <div class="canvas">'
+            <div class="canvas">
+          '
 
       HTML_FOOTER =
-        ' </div>
+        '
+          </div>
         </body>
         </html>'
 
@@ -185,7 +185,7 @@ module Graphics
       end
 
       def render_new_line
-        "<br>"
+        "<br>\n"
       end
     end
   end
