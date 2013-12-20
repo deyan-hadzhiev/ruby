@@ -1,12 +1,11 @@
 module Graphics
-  #Figures
+  #figures
   class Point
     attr_reader :x, :y
 
     def initialize(x, y)
       @x = x
       @y = y
-      self
     end
 
     def get_points
