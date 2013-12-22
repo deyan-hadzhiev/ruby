@@ -1,5 +1,4 @@
 module Graphics
-  #figures
   class Point
     attr_reader :x, :y
 
@@ -8,21 +7,15 @@ module Graphics
       @y = y
     end
 
-    def get_points
+    def points
       [self]
-    end
-
-    def in_bounds?(width, height)
-      x >= 0 and x < width and y >= 0 and y < height
-    end
-
-    def ==(other_point)
-      eql? other_point
     end
 
     def eql?(other_point)
       x == other_point.x and y == other_point.y
     end
+
+    alias == eql?
 
     def hash
       "(#{x},#{y})".hash
@@ -44,28 +37,27 @@ module Graphics
       @from == other_line.from and @to == other_line.to
     end
 
-    def ==(other_line)
-      eql? other_line
-    end
+    alias == eql?
 
     def hash
       "(#{@from.x},#{@from.y})-(#{@to.x},#{@to.y})".hash
     end
 
-    def in_bounds?(width, height)
-      @from.in_bounds?(width, height) and @to.in_bounds?(width, height)
-    end
-
-    def get_points
+    def points
       bresenham(@from, @to)
     end
 
+    private
+
     def bresenham(from, to)
       steep = (to.y - from.y).abs > (to.x - from.x).abs
+
       if steep then from, to = Point.new(from.y, from.x), Point.new(to.y, to.x) end
       if from.x > to.x then from, to = to, from end
-      delta_x, step_y = to.x - from.x, from.y < to.y ? 1 : -1
-      delta_y = (to.y - from.y).abs
+
+      deltas = bresenham_calculate_delta_and_step(from, to)
+      delta_x, delta_y, step_y = deltas[:delta_x], deltas[:delta_y], deltas[:step_y]
+
       bresenham_loop from.x, to.x, from.y, delta_x / 2, delta_x, delta_y, step_y, steep
     end
 
@@ -80,7 +72,13 @@ module Graphics
       end
     end
 
-    private :bresenham, :bresenham_loop
+    def bresenham_calculate_delta_and_step(from, to)
+      result = {}
+      result[:delta_x] = to.x - from.x
+      result[:delta_y] = (to.y - from.y).abs
+      result[:step_y] = from.y < to.y ? 1 : -1
+      result
+    end
   end
 
   class Rectangle
@@ -114,28 +112,24 @@ module Graphics
       top_left.eql? other.top_left and bottom_right.eql? other.bottom_right
     end
 
-    def ==(other)
-      eql? other
-    end
+    alias == eql?
 
     def hash
       "(#{top_left.x},#{top_left.y}):(#{bottom_right.x},#{bottom_right.y})".hash
     end
 
-    def in_bounds?(width, height)
-      top_left.in_bounds?(width, height) and bottom_right.in_bounds?(width, height)
-    end
-
-    def get_points
+    def points
       points = []
-      points.concat get_horizontal_points(top_left, top_right)
-      points.concat get_vertical_points(top_right, bottom_right)
-      points.concat get_horizontal_points(bottom_left, bottom_right)
-      points.concat get_vertical_points(top_left, bottom_left)
-      points
+      points << horizontal_points(top_left, top_right)
+      points << vertical_points(top_right, bottom_right)
+      points << horizontal_points(bottom_left, bottom_right)
+      points << vertical_points(top_left, bottom_left)
+      points.flatten
     end
 
-    def get_horizontal_points(left, right)
+    private
+
+    def horizontal_points(left, right)
       if left.y != right.y
         []
       else
@@ -143,118 +137,92 @@ module Graphics
       end
     end
 
-    def get_vertical_points(top, bottom)
+    def vertical_points(top, bottom)
       if top.x != bottom.x
         []
       else
         top.y.upto(bottom.y).to_a.map { |y| Point.new top.x, y }
       end
     end
-
-    private :get_horizontal_points, :get_vertical_points
   end
-end
 
-module Graphics
-  #renderers
   module Renderer
     class Generic
+      class << self
+        def render_canvas(canvas)
+          canvas_matrix = Array.new (canvas.height) do |row|
+            Array.new (canvas.width) { |column| canvas.pixel_at?(column, row) }
+          end
+
+          strings = canvas_matrix.map { |line| line.map { |pixel| render_pixel pixel } }
+          strings = strings.map { |line| line.join }.join render_new_line
+        end
+      end
     end
+
     class Ascii < Generic
+      HEADER = ""
+
+      FOOTER = ""
+
+      class << self
+        def render_pixel(pixel)
+          pixel ? "@" : "-"
+        end
+
+        def render_new_line
+          "\n"
+        end
+      end
     end
+
     class Html < Generic
-    end
-
-    class << Generic
-      def render(canvas)
-        output = ""
-        output << header
-        output << render_canvas(canvas)
-        output << footer
-        output
-      end
-
-      def render_canvas(canvas)
-        strings = canvas.map { |line| line.map { |pixel| render_pixel pixel } }
-        strings = strings.map { |line| line.join }.join render_new_line
-        strings
-      end
-    end
-
-    class << Ascii
-      def header
-        ""
-      end
-
-      def footer
-        ""
-      end
-
-      def render_pixel(pixel)
-        pixel ? "@" : "-"
-      end
-
-      def render_new_line
-        "\n"
-      end
-    end
-
-    class << Html
-      HTML_HEADER =
+      HEADER =
         '<!DOCTYPE html>
-          <html>
-          <head>
-            <title>Rendered Canvas</title>
-            <style type="text/css">
-              .canvas {
-                font-size: 1px;
-                line-height: 1px;
-              }
-              .canvas * {
-                display: inline-block;
-                width: 10px;
-                height: 10px;
-                border-radius: 5px;
-              }
-              .canvas i {
-                background-color: #eee;
-              }
-              .canvas b {
-                background-color: #333;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="canvas">
-          '
+            <html>
+            <head>
+              <title>Rendered Canvas</title>
+              <style type="text/css">
+                .canvas {
+                  font-size: 1px;
+                  line-height: 1px;
+                }
+                .canvas * {
+                  display: inline-block;
+                  width: 10px;
+                  height: 10px;
+                  border-radius: 5px;
+                }
+                .canvas i {
+                  background-color: #eee;
+                }
+                .canvas b {
+                  background-color: #333;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="canvas">
+            '
 
-      HTML_FOOTER =
+      FOOTER =
         '
-          </div>
-        </body>
-        </html>'
+            </div>
+          </body>
+          </html>'
 
-      def header
-        HTML_HEADER
-      end
+      class << self
+        def render_pixel(pixel)
+          pixel ? "<b></b>" : "<i></i>"
+        end
 
-      def footer
-        HTML_FOOTER
-      end
-
-      def render_pixel(pixel)
-        pixel ? "<b></b>" : "<i></i>"
-      end
-
-      def render_new_line
-        "<br>\n"
+        def render_new_line
+          "<br>\n"
+        end
       end
     end
   end
-end
 
-module Graphics
-  #canvas
   class Canvas
     class OutOfBounds < StandardError
     end
@@ -264,36 +232,27 @@ module Graphics
     def initialize( width, height)
       @width = width
       @height = height
-      @canvas = Array.new(height) { Array.new(width) { false } }
+      @canvas = {}
+      0.upto(height).each { |index| @canvas[index] = {} }
     end
 
     def set_pixel(x, y)
-      if x < 0 or x >= @width or y < 0 or y >= @height
-        raise OutOfBounds, "Setting a pixel out of canvas' bounds."
-      else
-        @canvas[y][x] = true
-      end
+      @canvas[y][x] = true
     end
 
     def pixel_at?(x, y)
-      if x < 0 or x >= @width or y < 0 or y >= @height
-        raise OutOfBounds, "Reaching a pixel out of canvas' bounds"
-      else
-        @canvas[y][x]
-      end
+      @canvas[y][x].nil? ? false : true
     end
 
     def draw(object)
-      if object.in_bounds?(width, height)
-        points = object.get_points
-        points.each { |point| set_pixel(point.x, point.y) }
-      else
-        raise OutOfBounds, "The object is out of canvas' bounds"
-      end
+      points = object.points
+      points.each { |point| set_pixel(point.x, point.y) }
     end
 
     def render_as(renderer)
-      renderer.render(@canvas)
+      output = renderer::HEADER
+      output << renderer.render_canvas(self)
+      output << renderer::FOOTER
     end
   end
 end
