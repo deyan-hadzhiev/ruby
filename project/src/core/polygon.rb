@@ -27,6 +27,10 @@ class Polygon
     end
   end
 
+  def vertex_count()
+    @points.length
+  end
+
   attr_reader :points
 
   private
