@@ -310,5 +310,25 @@ describe "Mesh" do
   end
 end
 
-describe "Mesh Exporter" do
+describe "MeshExporter" do
+  it "exports proper .obj files" do
+    mesh = Mesh.new [Vector[0.0, 0.0, 0.0], Vector[1.0, 0.0, 0.0], Vector[0.0, 1.0, 0.0]], [[0, 1, 2], [0, 2, 1]]
+    mesh_exporter = MeshExporter.new mesh
+    mesh_exporter.export("C:/test.obj")
+
+    file_input = []
+    File.open("C:/test.obj", "r").each_line do |line|
+      file_input << line.strip
+    end
+
+    file_input.should eq [
+      "v 0.000000 0.000000 0.000000",
+      "v 1.000000 0.000000 0.000000",
+      "v 0.000000 1.000000 0.000000",
+      "vn 0.000000 0.000000 1.000000",
+      "vn 0.000000 0.000000 -1.000000",
+      "f 1//1 2//1 3//1",
+      "f 1//2 3//2 2//2",
+    ]
+  end
 end
