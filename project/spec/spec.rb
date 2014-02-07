@@ -310,6 +310,19 @@ describe "Mesh" do
   end
 end
 
+describe "PolygonIndiceCalculator" do
+  it "calculates triangle indices" do
+    indices = PolygonIndiceCalculator.get_indices(5)
+    indices.should eq [[0, 1, 5], [1, 6, 5], [1, 2, 6], [2, 7, 6], [2, 3, 7], [3, 8, 7], [3, 4, 8], [4, 9, 8]]
+  end
+
+  it "calculates wrapped triangle indices" do
+    indices = PolygonIndiceCalculator.get_indices(5, 2)
+    indices = PolygonIndiceCalculator.wrap_indices(indices, 15)
+    indices.should eq [[10, 11, 0], [11, 1, 0], [11, 12, 1], [12, 2, 1], [12, 13, 2], [13, 3, 2], [13, 14, 3], [14, 4, 3]]
+  end
+end
+
 describe "MeshExporter" do
   it "exports proper .obj files" do
     mesh = Mesh.new [Vector[0.0, 0.0, 0.0], Vector[1.0, 0.0, 0.0], Vector[0.0, 1.0, 0.0]], [[0, 1, 2], [0, 2, 1]]
