@@ -10,6 +10,16 @@ class Float
   end
 end
 
+#monkey patch the Vector because of a bug
+class Vector
+  def cross_product(v)
+    Vector.Raise ErrDimensionMismatch unless size == v.size && v.size == 3
+    Vector[ v[2]*@elements[1] - v[1]*@elements[2],
+            v[0]*@elements[2] - v[2]*@elements[0],
+            v[1]*@elements[0] - v[0]*@elements[1] ]
+  end
+end
+
 module Combinatorics
   class << self
     def factorial(n)
