@@ -144,7 +144,20 @@ describe "Spline" do
   end
 end
 
-describe "Polygon Resolver" do
+describe "Revolver" do
+  it "produces properly rotated points 1" do
+    revolver = Revolver.new [Vector[1.0, 1.0, 1.0], Vector[1.0, 0.0, 0.0], Vector[-1.0, -1.0, 3.0]]
+    revolver.rotate_points(:y, Math::PI / 2).should eq [Vector[1.0, 1.0, -1.0], Vector[0, 0, -1.0], Vector[3.0, -1.0, 1.0]]
+  end
+
+  it "produces properly rotated points 2" do
+    revolver = Revolver.new [
+      Vector[1.4142135623730950488016887242097, 0.0, 0.0],
+      Vector[0.0, 2.8284271247461900976033774484194, 0.0],
+      Vector[1.4142135623730950488016887242097, 1.4142135623730950488016887242097, 0.0],
+    ]
+    revolver.rotate_points(:z, Math::PI / 4).should eq [Vector[1.0, 1.0, 0.0], Vector[-2.0, 2.0, 0.0], Vector[0.0, 2.0, 0.0]]
+  end
 end
 
 describe "Mesh" do
