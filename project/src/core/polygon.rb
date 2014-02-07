@@ -3,7 +3,11 @@ require_relative "./utils.rb"
 
 class Polygon
   def initialize(array = [])
-    @points = Array.new(array)
+    if array.kind_of?(Polygon)
+      @points = Array.new(array.points)
+    else
+      @points = Array.new(array)
+    end
   end
 
   def get_point(index)
