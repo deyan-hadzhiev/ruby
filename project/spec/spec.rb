@@ -28,6 +28,14 @@ describe "Utilities" do
   it "calculate bernstein values 3" do
     Combinatorics.bernstein(2, 1, 0.6).should eq 0.48
   end
+
+  it "generate rotational matrices (x, 2 * PI)" do
+    Transformations.get_rotational_matrix(:x, 2 * Math::PI).should eq Matrix.identity(3)
+  end
+
+  it "generate rotational matrices (y, PI / 2)" do
+    Transformations.get_rotational_matrix(:y, Math::PI).should eq Matrix[[-1.0, 0, 0], [0, 1, 0], [0, 0, -1.0]]
+  end
 end
 
 describe "Polygon" do
