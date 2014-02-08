@@ -15,10 +15,14 @@ class Spline
   def get_precise_points(precision)
     precise_points = []
     curves = get_curves_count
-    0.upto(curves - 1).each do |curve_index|
-      precise_points.concat Spline.get_bezier_points(get_curve_points(curve_index), precision)
+    if curves > 0
+      0.upto(curves - 1).each do |curve_index|
+        precise_points.concat Spline.get_bezier_points(get_curve_points(curve_index), precision)
+      end
+      precise_points << @control_polygon.points[-1]
+    else
+      []
     end
-    precise_points << @control_polygon.points[-1]
   end
 
   attr_reader :control_polygon
