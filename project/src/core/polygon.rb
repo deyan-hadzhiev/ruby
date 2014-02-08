@@ -31,6 +31,16 @@ class Polygon
     end
   end
 
+  def include?(vertex, radius = 0)
+    vectors = @points.map { |point| point - vertex }
+    vectors.any? {|vector| vector.magnitude <= radius + Constants::EPS }
+  end
+
+  def find_index(vertex, radius = 0)
+    vectors = @points.map { |point| point - vertex }
+    vectors.find_index { |vector| vector.magnitude <= radius + Constants::EPS }
+  end
+
   def remove_point(index)
     @points.delete_at(index)
   end
@@ -39,7 +49,7 @@ class Polygon
     @points.length
   end
 
-  attr_reader :points
+  attr_accessor :points
 
   private
 

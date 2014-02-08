@@ -47,6 +47,14 @@ describe "Polygon" do
       Vector[0, 8, 0],
     ].freeze
 
+  VECTOR_BIG_ARRAY = [
+      Vector[0, 0, 0],
+      Vector[50, 50, 0],
+      Vector[100, 100, 0],
+      Vector[42, 42, 0],
+      Vector[73, 1729, 0],
+    ].freeze
+
   it "creates vector polygons" do
     poly = Polygon.new VECTOR_ARRAY
     poly.points.should eq VECTOR_ARRAY
@@ -55,6 +63,21 @@ describe "Polygon" do
   it "retrieves exact point" do
     poly = Polygon.new VECTOR_ARRAY
     poly.get_point(2).should eq VECTOR_ARRAY[2]
+  end
+
+  it "evaluates properly include? (true)" do
+    poly = Polygon.new VECTOR_BIG_ARRAY
+    poly.include?(Vector[43, 45, 0], 5).should eq true
+  end
+
+  it "evaluates properly include? (false)" do
+    poly = Polygon.new VECTOR_BIG_ARRAY
+    poly.include?(Vector[100, 1729, 0], 10).should eq false
+  end
+
+  it "finds a point by a given vertex and search radius" do
+    poly = Polygon.new VECTOR_BIG_ARRAY
+    poly.find_index(Vector[51, 52, 0], 5).should eq 1
   end
 
   it "removes a point" do
