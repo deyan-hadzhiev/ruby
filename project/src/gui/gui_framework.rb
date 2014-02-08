@@ -17,6 +17,10 @@ module Gui
   SELECTED_VERTEX_RADIUS = 8
   CONTROL_VERTEX_RADIUS = 4
   BASE_CURVE_DRAW_STEP = 0.003
+  BUTTON_WIDTH = 80
+  BUTTON_HEIGHT = 30
+  TEXT_HEIGHT = 20
+  TEXT_SIZE = 12
 end
 
 Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: Gui::WINDOW_HEIGHT do
@@ -90,11 +94,21 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
     end
   end
 
+  def export_mesh
+    p @export_filename
+  end
+
+  def start_raytracer
+    p @object_filename
+  end
+
   #main
   @polygon = Polygon.new []
   @selected_point_index = nil
   @spline_degree = 4
   @spline_precision = 5
+  @export_filename = "test.obj"
+  @object_filename = "test.obj"
 
   draw_area = stack width: self.width - Gui::BUTTON_AREA_WIDTH, height: self.height do
     clear_draw_area
@@ -128,6 +142,86 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
     end
   }
 
-  button('start') {draw_poly Polygon.new([Vector[20, 20, 0], Vector[40, 40, 0]])}.move 10, 200
+  button_area = stack left: self.width - Gui::BUTTON_AREA_WIDTH, width: Gui::BUTTON_AREA_WIDTH, height: self.height do
+    background darkgray
+    button_clear = button "Clear", width: Gui::BUTTON_WIDTH, height: Gui::BUTTON_HEIGHT do
+      @polygon = Polygon.new []
+      redraw
+    end
+
+    label_precision = banner "Precision"
+    label_precision.style size: Gui::TEXT_SIZE
+
+    edit_precision = edit_line width: Gui::BUTTON_WIDTH, text: @spline_precision.to_s do |self_obj|
+      unless self_obj.text.empty?
+        @spline_precision = self_obj.text.to_i
+        redraw
+      end
+    end
+
+    label_degree = banner "Degree"
+    label_degree.style size: Gui::TEXT_SIZE
+
+    edit_degree = edit_line width: Gui::BUTTON_WIDTH, text: @spline_degree.to_s do |self_obj|
+      unless self_obj.text.empty?
+        @spline_degree = self_obj.text.to_i
+        redraw
+      end
+    end
+
+    label_export = banner "Export"
+    label_export.style size: Gui::TEXT_SIZE
+
+    edit_export = edit_line width: Gui::BUTTON_WIDTH, text: @export_filename do |self_obj|
+      unless self_obj.text.empty?
+        @export_filename = self_obj.text
+      end
+    end
+
+    button_export = button "Export", width: Gui::BUTTON_WIDTH, height: Gui::BUTTON_HEIGHT do
+      export_mesh
+    end
+
+    label_show = banner "Show"
+    label_show.style size: Gui::TEXT_SIZE
+
+    edit_show = edit_line width: Gui::BUTTON_WIDTH, text: @object_filename do |self_obj|
+      unless self_obj.text.emtpy?
+        @object_filename = self_obj.text
+      end
+    end
+
+    button_show = button "Show", width: Gui::BUTTON_WIDTH, height: Gui::BUTTON_HEIGHT do
+      start_raytracer
+    end
+
+    x_destination = self.width - Gui::BUTTON_WIDTH - Gui::PADDING
+    y_destination = Gui::PADDING
+
+    button_clear.move x_destination, y_destination
+    y_destination += Gui::BUTTON_HEIGHT + Gui::PADDING
+    label_precision.move x_destination, y_destination
+    y_destination += Gui::TEXT_HEIGHT + Gui::PADDING
+    edit_precision.move x_destination, y_destination
+    y_destination += Gui::BUTTON_HEIGHT + Gui::PADDING
+    label_degree.move x_destination, y_destination
+    y_destination += Gui::TEXT_HEIGHT + Gui::PADDING
+    edit_degree.move x_destination, y_destination
+    y_destination += Gui::BUTTON_HEIGHT + Gui::PADDING * 3
+
+    label_export.move x_destination, y_destination
+    y_destination += Gui::TEXT_HEIGHT + Gui::PADDING
+    edit_export.move x_destination, y_destination
+    y_destination += Gui::BUTTON_HEIGHT + Gui::PADDING
+    button_export.move x_destination, y_destination
+    y_destination += Gui::BUTTON_HEIGHT + Gui::PADDING * 2
+
+    label_show.move x_destination, y_destination
+    y_destination += Gui::TEXT_HEIGHT + Gui::PADDING
+    edit_show.move x_destination, y_destination
+    y_destination += Gui::BUTTON_HEIGHT + Gui::PADDING
+    button_show.move x_destination, y_destination
+
+  end
 
 end
