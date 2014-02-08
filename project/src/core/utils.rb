@@ -1,7 +1,7 @@
 require 'Matrix'
 
 module Constants
-  EPS = 1e-6.freeze
+  EPS = 1e-8.freeze
 end
 
 class Float
