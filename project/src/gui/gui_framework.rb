@@ -11,20 +11,20 @@ require_relative '../core/mesh_exporter.rb'
 module Gui
   WINDOW_WIDTH = 1024
   WINDOW_HEIGHT = 768
-  DRAW_AREA_WIDTH = 768
   PADDING = 10
   BUTTON_AREA_WIDTH = 100
   VERTEX_RADIUS = 6
   SELECTED_VERTEX_RADIUS = 8
+  CONTROL_VERTEX_RADIUS = 4
   BASE_CURVE_DRAW_STEP = 0.003
 end
 
 Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: Gui::WINDOW_HEIGHT do
 
   def clear_draw_area
-    background beige
-    fill beige
-    stroke beige
+    background lightgrey
+    fill lightgrey
+    stroke lightgrey
     rect 0, 0, self.width - Gui::BUTTON_AREA_WIDTH, self.height
     stroke dodgerblue
     strokewidth 3
@@ -41,8 +41,7 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
     0.upto(curves_count - 1).each do |curve_index|
       draw_bezier_curve spline.get_curve_points(curve_index), Gui::BASE_CURVE_DRAW_STEP * @polygon.vertex_count
     end
-
-  # draw_final_points(spline.get_precise_points(5))
+    draw_final_points(spline.get_precise_points(@spline_precision))
   end
 
   def draw_polygon
@@ -53,7 +52,7 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
       line( @polygon.points[index][0], @polygon.points[index][1], @polygon.points[index - 1][0], @polygon.points[index - 1][1]) if index != 0
     end
 
-    fill red
+    fill yellow
     @polygon.points.each do |point|
       oval left: point[0] - Gui::VERTEX_RADIUS, top: point[1] - Gui::VERTEX_RADIUS, radius: Gui::VERTEX_RADIUS
     end
@@ -84,9 +83,10 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
   end
 
   def draw_final_points(points)
-    stroke green
+    fill black
+    stroke black
     points.each do |point|
-      oval left: point[0] - 4, top: point[1] - 4, radius: 4
+      oval left: point[0] - Gui::CONTROL_VERTEX_RADIUS, top: point[1] - Gui::CONTROL_VERTEX_RADIUS, radius: Gui::CONTROL_VERTEX_RADIUS
     end
   end
 
@@ -94,6 +94,7 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
   @polygon = Polygon.new []
   @selected_point_index = nil
   @spline_degree = 4
+  @spline_precision = 5
 
   draw_area = stack width: self.width - Gui::BUTTON_AREA_WIDTH, height: self.height do
     clear_draw_area
