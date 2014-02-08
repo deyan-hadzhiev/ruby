@@ -31,6 +31,10 @@ class Polygon
     end
   end
 
+  def remove_point(index)
+    @points.delete_at(index)
+  end
+
   def vertex_count()
     @points.length
   end
