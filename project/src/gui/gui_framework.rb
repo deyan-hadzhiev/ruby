@@ -95,7 +95,11 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
   end
 
   def export_mesh
-    p @export_filename
+    reversed_polygon = Polygon.new @polygon.points.map { |vertex| Vector[ vertex[0] * 0.1, (Gui::WINDOW_HEIGHT - Gui::PADDING - vertex[1]) * 0.1, vertex[2] * 0.1] }
+    mesh_generator = MeshGenerator.new polygon: reversed_polygon, degree: @spline_degree, precision: @spline_precision, rotations: @rotations
+    mesh = mesh_generator.get_mesh
+    mesh_exporter = MeshExporter.new mesh
+    mesh_exporter.export @export_filename
   end
 
   def start_raytracer
@@ -107,6 +111,7 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
   @selected_point_index = nil
   @spline_degree = 4
   @spline_precision = 5
+  @rotations = 8
   @export_filename = "test.obj"
   @object_filename = "test.obj"
 
@@ -169,6 +174,15 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
       end
     end
 
+    label_rotations = banner "Rotations"
+    label_rotations.style size: Gui::TEXT_SIZE
+
+    edit_rotations = edit_line width: Gui::BUTTON_WIDTH, text: @rotations.to_s do |self_obj|
+      unless self_obj.text.empty?
+        @rotations = self_obj.text.to_i
+      end
+    end
+
     label_export = banner "Export"
     label_export.style size: Gui::TEXT_SIZE
 
@@ -207,6 +221,10 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
     label_degree.move x_destination, y_destination
     y_destination += Gui::TEXT_HEIGHT + Gui::PADDING
     edit_degree.move x_destination, y_destination
+    y_destination += Gui::BUTTON_HEIGHT + Gui::PADDING
+    label_rotations.move x_destination, y_destination
+    y_destination += Gui::TEXT_HEIGHT + Gui::PADDING
+    edit_rotations.move x_destination, y_destination
     y_destination += Gui::BUTTON_HEIGHT + Gui::PADDING * 3
 
     label_export.move x_destination, y_destination
