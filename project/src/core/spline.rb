@@ -55,6 +55,7 @@ class Spline
     end
 
     def calculate_bezier_coordinate(coordinates, t)
+      t = 1.0 if t > 1.0
       degree = coordinates.length - 1
       indices = 0.upto(degree).to_a
       indices.reduce(0.0) do |result, index|
