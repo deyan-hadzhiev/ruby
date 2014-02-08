@@ -57,6 +57,17 @@ describe "Polygon" do
     poly.get_point(2).should eq VECTOR_ARRAY[2]
   end
 
+  it "removes a point" do
+    poly = Polygon.new VECTOR_ARRAY
+    poly.remove_point(2)
+    poly.points.should eq [
+      Vector[0, 0, 0],
+      Vector[1.5, 2, 0],
+      Vector[1.5, 6, 0],
+      Vector[0, 8, 0],
+    ]
+  end
+
   it "adds a new point with :closest" do
     poly = Polygon.new VECTOR_ARRAY
     poly.add_point(Vector[1, 1, 0])
@@ -320,6 +331,11 @@ describe "PolygonIndiceCalculator" do
     indices = PolygonIndiceCalculator.get_indices(5, 2)
     indices = PolygonIndiceCalculator.wrap_indices(indices, 15)
     indices.should eq [[10, 11, 0], [11, 1, 0], [11, 12, 1], [12, 2, 1], [12, 13, 2], [13, 3, 2], [13, 14, 3], [14, 4, 3]]
+  end
+
+  it "calculates end (top and bottom) indices" do
+    indices = PolygonIndiceCalculator.get_end_indices(8, 9, 2, 4)
+    indices.should eq [[8, 0, 2], [8, 2, 4], [8, 4, 6], [8, 6, 0], [9, 3, 1], [9, 5, 3], [9, 7, 5], [9, 1, 7]]
   end
 end
 
