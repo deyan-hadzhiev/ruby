@@ -16,6 +16,7 @@ module Gui
   BUTTON_AREA_WIDTH = 100
   VERTEX_RADIUS = 6
   SELECTED_VERTEX_RADIUS = 8
+  BASE_CURVE_DRAW_STEP = 0.003
 end
 
 Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: Gui::WINDOW_HEIGHT do
@@ -32,8 +33,19 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
     line Gui::PADDING, self.height - Gui::PADDING, self.width - Gui::BUTTON_AREA_WIDTH - Gui::PADDING, self.height - Gui::PADDING
   end
 
-  def draw_polygon
+  def redraw
     clear_draw_area
+    draw_polygon
+    spline = Spline.new @polygon, @spline_degree
+    curves_count = spline.get_curves_count
+    0.upto(curves_count - 1).each do |curve_index|
+      draw_bezier_curve spline.get_curve_points(curve_index), Gui::BASE_CURVE_DRAW_STEP * @polygon.vertex_count
+    end
+
+  # draw_final_points(spline.get_precise_points(5))
+  end
+
+  def draw_polygon
     stroke blue
     strokewidth 3
     cap :curve
@@ -52,20 +64,22 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
     end
   end
 
-  def draw_bezier_curve(points)
+  def draw_bezier_curve(points, draw_step)
     t = 0.0
-    step = 0.005
 
     stroke red
     fill red
     strokewidth 3
+    cap :curve
 
     coords = points.map { |point| point.to_a }.transpose
     while t < 1.0 do
-      x = Spline.calculate_bezier_coordinate(coords[0], t)
-      y = Spline.calculate_bezier_coordinate(coords[1], t)
-      oval x - 2, y - 2, radius: 2
-      t += step
+      x_start = Spline.calculate_bezier_coordinate coords[0], t
+      y_start = Spline.calculate_bezier_coordinate coords[1], t
+      x_end = Spline.calculate_bezier_coordinate coords[0], t + draw_step
+      y_end = Spline.calculate_bezier_coordinate coords[1], t + draw_step
+      line x_start, y_start, x_end, y_end
+      t += draw_step
     end
   end
 
@@ -79,6 +93,7 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
   #main
   @polygon = Polygon.new []
   @selected_point_index = nil
+  @spline_degree = 4
 
   draw_area = stack width: self.width - Gui::BUTTON_AREA_WIDTH, height: self.height do
     clear_draw_area
@@ -99,26 +114,18 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
             @polygon.add_point point
           end
         end
-        draw_polygon
+        redraw
       when 3 #right click
         @selected_point_index = nil
         if @polygon.include? point, Gui::VERTEX_RADIUS
           index = @polygon.find_index point, Gui::VERTEX_RADIUS
           @polygon.remove_point index
         end
-        draw_polygon
+        redraw
       else
         @selected_point_index = nil
     end
   }
-
-  #spline = Spline.new poly, 4
-  # n = spline.get_curves_count
-  # 0.upto(n - 1).each do |curve_index|
-  #   draw_bezier_curve(spline.get_curve_points curve_index)
-  # end
-
-  # draw_final_points(spline.get_precise_points(5))
 
   button('start') {draw_poly Polygon.new([Vector[20, 20, 0], Vector[40, 40, 0]])}.move 10, 200
 
