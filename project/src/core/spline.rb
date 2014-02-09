@@ -49,7 +49,7 @@ class Spline
       t = 0.0
       step = 1.0 / precision
       coordinate_arrays = points.map { |point| point.to_a }.transpose
-      while t < 1.0 do
+      while t < 0.9999 do
         x = calculate_bezier_coordinate(coordinate_arrays[0], t)
         y = calculate_bezier_coordinate(coordinate_arrays[1], t)
         result_points << Vector[x, y, 0.0]
