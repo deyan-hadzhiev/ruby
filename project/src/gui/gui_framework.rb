@@ -96,7 +96,7 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
   end
 
   def export_mesh
-    reversed_polygon = Polygon.new @polygon.points.map { |vertex| Vector[ vertex[0] * 0.1, (Gui::WINDOW_HEIGHT - Gui::PADDING - vertex[1]) * 0.1, vertex[2] * 0.1] }
+    reversed_polygon = Polygon.new @polygon.points.map { |vertex| Vector[ (vertex[0] - Gui::PADDING) * 0.1, (Gui::WINDOW_HEIGHT - Gui::PADDING - vertex[1]) * 0.1, vertex[2] * 0.1] }
     mesh_generator = MeshGenerator.new polygon: reversed_polygon, degree: @spline_degree, precision: @spline_precision, rotations: @rotations
     mesh = mesh_generator.get_mesh
     mesh_exporter = MeshExporter.new mesh
@@ -213,9 +213,7 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
     label_export.style size: Gui::TEXT_SIZE
 
     edit_export = edit_line width: Gui::BUTTON_WIDTH, text: @export_filename do |self_obj|
-      unless self_obj.text.empty?
-        @export_filename = self_obj.text
-      end
+      @export_filename = self_obj.text
     end
 
     button_export = button "Export", width: Gui::BUTTON_WIDTH, height: Gui::BUTTON_HEIGHT do
@@ -226,9 +224,7 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
     label_show.style size: Gui::TEXT_SIZE
 
     edit_show = edit_line width: Gui::BUTTON_WIDTH, text: @object_filename do |self_obj|
-      unless self_obj.text.emtpy?
-        @object_filename = self_obj.text
-      end
+      @object_filename = self_obj.text
     end
 
     button_show = button "Show", width: Gui::BUTTON_WIDTH, height: Gui::BUTTON_HEIGHT do
