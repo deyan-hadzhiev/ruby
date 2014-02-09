@@ -104,6 +104,8 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
   end
 
   def start_raytracer
+    Raytracer.copy_obj_file @object_filename
+    Raytracer.create_scene @object_filename
     Raytracer.start_raytracer
   end
 
