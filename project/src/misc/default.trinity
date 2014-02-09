@@ -37,7 +37,7 @@ Plane wall {
 }
 
 Mesh testmesh {
-	file	%s
+	file	"%s"
 }
 
 //////////////////////// TEXTURES & SHADERS  ///////////////////////////////
