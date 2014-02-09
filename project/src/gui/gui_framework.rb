@@ -7,6 +7,7 @@ require_relative '../core/revolver.rb'
 require_relative '../core/mesh.rb'
 require_relative '../core/mesh_generator.rb'
 require_relative '../core/mesh_exporter.rb'
+require_relative '../misc/raytracer.rb'
 
 module Gui
   WINDOW_WIDTH = 1024
@@ -103,7 +104,7 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
   end
 
   def start_raytracer
-    p @object_filename
+    Raytracer.start_raytracer
   end
 
   #main
