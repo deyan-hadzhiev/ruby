@@ -109,9 +109,24 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
     Raytracer.start_raytracer
   end
 
+  def draw_add_mode_indicator
+    x = self.width - Gui::BUTTON_AREA_WIDTH / 2 + Gui::BUTTON_WIDTH / 2 - 5
+    y = Gui::BUTTON_HEIGHT + Gui::TEXT_HEIGHT + Gui::PADDING * 3 + Gui::BUTTON_HEIGHT / 2
+    if @add_mode == :closest then
+      fill green
+      stroke green
+    else
+      fill red
+      stroke red
+    end
+    oval x - 5, y -5, radius: 5
+  end
+
   #main
   @polygon = Polygon.new []
+
   @selected_point_index = nil
+  @add_mode = :append
   @spline_degree = 4
   @spline_precision = 5
   @rotations = 8
@@ -134,7 +149,7 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
           if @polygon.include? point, Gui::VERTEX_RADIUS
             @selected_point_index = @polygon.find_index point, Gui::VERTEX_RADIUS
           else
-            @polygon.add_point point
+            @polygon.add_point point, @add_mode
           end
         end
         redraw
@@ -155,6 +170,14 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
     button_clear = button "Clear", width: Gui::BUTTON_WIDTH, height: Gui::BUTTON_HEIGHT do
       @polygon = Polygon.new []
       redraw
+    end
+
+    label_add_mode = banner "Add Mode"
+    label_add_mode.style size: Gui::TEXT_SIZE
+
+    button_add_mode = button "Closest?", width: Gui::BUTTON_WIDTH - 15, height: Gui::BUTTON_HEIGHT do
+      @add_mode = (@add_mode == :append ? :closest : :append)
+      draw_add_mode_indicator
     end
 
     label_precision = banner "Precision"
@@ -217,6 +240,10 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
 
     button_clear.move x_destination, y_destination
     y_destination += Gui::BUTTON_HEIGHT + Gui::PADDING
+    label_add_mode.move x_destination, y_destination
+    y_destination += Gui::TEXT_HEIGHT + Gui::PADDING
+    button_add_mode.move x_destination, y_destination
+    y_destination += Gui::BUTTON_HEIGHT + Gui::PADDING * 2
     label_precision.move x_destination, y_destination
     y_destination += Gui::TEXT_HEIGHT + Gui::PADDING
     edit_precision.move x_destination, y_destination
@@ -242,6 +269,8 @@ Shoes.app title: "Revolved Objects creator", width: Gui::WINDOW_WIDTH, height: G
     edit_show.move x_destination, y_destination
     y_destination += Gui::BUTTON_HEIGHT + Gui::PADDING
     button_show.move x_destination, y_destination
+
+    draw_add_mode_indicator
 
   end
 

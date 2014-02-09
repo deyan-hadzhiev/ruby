@@ -93,8 +93,8 @@ describe "Polygon" do
 
   it "adds a new point with :closest" do
     poly = Polygon.new VECTOR_ARRAY
-    poly.add_point(Vector[1, 1, 0])
-    poly.add_point(Vector[1, 7, 0])
+    poly.add_point(Vector[1, 1, 0], :closest)
+    poly.add_point(Vector[1, 7, 0], :closest)
     poly.points.should eq [
       Vector[0, 0, 0],
       Vector[1, 1, 0],
@@ -108,8 +108,8 @@ describe "Polygon" do
 
   it "adds a new point with index" do
     poly = Polygon.new VECTOR_ARRAY
-    poly.add_point(Vector[1, 1, 1], 1)
-    poly.add_point(Vector[8, 9, 10], 5)
+    poly.add_point(Vector[1, 1, 1], :fixed, 1)
+    poly.add_point(Vector[8, 9, 10], :fixed, 5)
     poly.points.should eq [
       Vector[0, 0, 0],
       Vector[1, 1, 1],
